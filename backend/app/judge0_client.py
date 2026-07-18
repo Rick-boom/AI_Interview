@@ -13,9 +13,10 @@ import httpx
 
 from app.config import settings
 
-# Judge0 language id for Python 3 (see https://ce.judge0.com/languages/)
+# Judge0 language id for Python 3 (71) and C++ GCC (54)
 LANGUAGE_IDS = {
     "python": 71,
+    "cpp": 54,
 }
 
 START_MARKER = "###RESULTS_START###"
@@ -58,7 +59,10 @@ class Judge0Error(Exception):
     pass
 
 
-def build_source(candidate_code: str, function_name: str, test_cases: list[dict]) -> str:
+def build_source(candidate_code: str, function_name: str, test_cases: list[dict], language: str, question: dict = None) -> str:
+    if language == "cpp" and question and "cpp_driver" in question:
+        return candidate_code + "\n\n" + question["cpp_driver"]
+    
     driver = DRIVER_TEMPLATE.format(
         test_cases_json=json.dumps(test_cases),
         function_name_json=json.dumps(function_name),
@@ -68,7 +72,7 @@ def build_source(candidate_code: str, function_name: str, test_cases: list[dict]
     return candidate_code + "\n\n" + driver
 
 
-async def run_against_test_cases(candidate_code: str, function_name: str, test_cases: list[dict], language: str = "python") -> dict:
+async def run_against_test_cases(candidate_code: str, function_name: str, test_cases: list[dict], language: str = "python", question: dict = None) -> dict:
     """
     Returns {"results": [...], "stderr": str|None, "compile_error": str|None, "status": str}
     Falls back to a clear error dict if Judge0 isn't configured, rather than raising,
@@ -83,7 +87,7 @@ async def run_against_test_cases(candidate_code: str, function_name: str, test_c
         }
 
     language_id = LANGUAGE_IDS.get(language, 71)
-    source = build_source(candidate_code, function_name, test_cases)
+    source = build_source(candidate_code, function_name, test_cases, language, question)
 
     headers = {
         "content-type": "application/json",

@@ -16,26 +16,28 @@ async function startMockSession() {
         state.totalQuestions = data.total_questions;
         state.isPracticeMode = false;
         
-        state.mockQuestions = [formatBackendQuestion(data.question)];
+        state.mockQuestions = data.questions.map(formatBackendQuestion);
         state.activeQuestionIdx = 0;
         state.codeSubmissions = {};
         
-        const q = state.mockQuestions[0];
-        state.codeSubmissions[q.id] = {
-            code: q.starterCode.python,
-            lang: "python",
-            saved: false,
-            evaluation: null
-        };
+        state.mockQuestions.forEach(q => {
+            state.codeSubmissions[q.id] = {
+                code: q.starterCode.python, // Default language
+                lang: "python",
+                saved: false,
+                evaluation: null
+            };
+        });
         
         DOM.btnSubmitMock.style.display = "";
         DOM.btnSubmitMock.disabled = false;
         DOM.sessionTimer.style.display = "";
         
-        DOM.workspaceTabsContainer.innerHTML = `<button class="tab-btn active"><i class="fa-solid fa-circle-check"></i> Question 1 of ${state.totalQuestions}</button>`;
-        
         startTimer(90 * 60);
         switchPanel("workspace");
+        
+        // Render tabs natively
+        renderWorkspaceTabs();
         loadQuestion(0);
         
     } catch(e) {
@@ -58,15 +60,20 @@ function formatBackendQuestion(bq) {
         targetTime: "Optimal",
         targetSpace: "Optimal",
         testCases: [],
-        starterCode: {
-            python: bq.starter_code
-        }
+        starterCode: bq.starter_code
     };
 }
 
+// Override loadQuestion to prevent accessing missing testCases array mapping in app.js
 function loadQuestion(idx) {
     state.activeQuestionIdx = idx;
     const q = state.mockQuestions[idx];
+
+    // Highlight active tab
+    document.querySelectorAll(".tab-btn").forEach((btn, i) => {
+        if (i === idx) btn.classList.add("active");
+        else btn.classList.remove("active");
+    });
 
     DOM.questionDetails.innerHTML = `
         <div class="question-header">
@@ -84,21 +91,45 @@ function loadQuestion(idx) {
         <div class="q-detail-text">${q.constraints}</div>
     `;
 
+    // Load code into editor (syncing dropdown with submission lang)
+    const sub = state.codeSubmissions[q.id];
+    DOM.langSelect.value = sub.lang;
     loadQuestionCodeTemplate();
 
     DOM.consoleOutputBox.innerHTML = `
-        <div class="console-message system">Loaded workspace for ${q.title}. Click "Submit & Next" when you are done.</div>
+        <div class="console-message system">Loaded workspace for ${q.title}. Click "Run Code / Submit" to evaluate your solution.</div>
     `;
 }
 
-async function finishMockSession() {
+// Override lang change behavior to update code template if code hasn't been changed
+DOM.langSelect.addEventListener("change", (e) => {
+    if (!state.mockQuestions || state.activeQuestionIdx === null) return;
+    const q = state.mockQuestions[state.activeQuestionIdx];
+    const sub = state.codeSubmissions[q.id];
+    
+    // Only overwrite editor if they haven't written custom code (i.e. it matches the old template)
+    const currentEditorCode = window.editor.getValue();
+    const oldTemplate = q.starterCode[sub.lang];
+    
+    sub.lang = e.target.value;
+    
+    if (currentEditorCode === oldTemplate || currentEditorCode.trim() === "") {
+        sub.code = q.starterCode[sub.lang];
+        window.editor.setValue(sub.code);
+    }
+    
+    // Update Monaco language mode
+    monaco.editor.setModelLanguage(window.editor.getModel(), sub.lang);
+});
+
+// Run Code acts as our single-question submit
+async function runActiveQuestion() {
     const q = state.mockQuestions[state.activeQuestionIdx];
     saveActiveQuestionCode();
     const sub = state.codeSubmissions[q.id];
     
-    DOM.consoleOutputBox.innerHTML += `<div class="console-message info"><i class="fa-solid fa-spinner fa-spin"></i> Submitting to backend for evaluation...</div>`;
+    DOM.consoleOutputBox.innerHTML += `<div class="console-message info"><i class="fa-solid fa-spinner fa-spin"></i> Submitting ${q.title} to backend for evaluation...</div>`;
     DOM.consoleOutputBox.scrollTop = DOM.consoleOutputBox.scrollHeight;
-    DOM.btnSubmitMock.disabled = true;
     
     const timeTaken = (90*60) - state.timeLeft; 
     
@@ -106,53 +137,44 @@ async function finishMockSession() {
         const res = await fetch(`${API_BASE}/${state.sessionId}/submit`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code: sub.code, language: "python", time_taken_seconds: timeTaken })
+            body: JSON.stringify({ question_id: q.id, code: sub.code, language: sub.lang, time_taken_seconds: timeTaken })
         });
         
         const data = await res.json();
         const ev = data.evaluation;
         
         DOM.consoleOutputBox.innerHTML += `
-            <div class="console-message log"><strong>Correctness:</strong> ${ev.correctnessScore}%</div>
-            <div class="console-message log"><strong>Time Score:</strong> ${ev.timeScore} | <strong>Space Score:</strong> ${ev.spaceScore}</div>
+            <div class="console-message log"><strong>[${q.title}] Correctness:</strong> ${ev.correctnessScore}%</div>
+            <div class="console-message log"><strong>[${q.title}] Time Score:</strong> ${ev.timeScore} | <strong>Space Score:</strong> ${ev.spaceScore}</div>
             <div class="console-message log" style="white-space: pre-wrap;"><strong>Feedback:</strong>\n${ev.feedback}</div>
         `;
         DOM.consoleOutputBox.scrollTop = DOM.consoleOutputBox.scrollHeight;
         
-        setTimeout(() => {
-            if (data.is_last_question) {
-                fetchAndShowReport();
-            } else {
-                const nq = formatBackendQuestion(data.next_question);
-                state.mockQuestions.push(nq);
-                state.activeQuestionIdx++;
-                
-                state.codeSubmissions[nq.id] = {
-                    code: nq.starterCode.python,
-                    lang: "python",
-                    saved: false,
-                    evaluation: null
-                };
-                
-                DOM.workspaceTabsContainer.innerHTML = `<button class="tab-btn active"><i class="fa-solid fa-circle-check"></i> Question ${state.activeQuestionIdx + 1} of ${state.totalQuestions}</button>`;
-                
-                loadQuestion(state.activeQuestionIdx);
-                DOM.btnSubmitMock.disabled = false;
-            }
-        }, 3000);
+        // Mark the tab as completed (green check)
+        const activeTab = document.querySelectorAll(".tab-btn")[state.activeQuestionIdx];
+        if (activeTab) {
+            activeTab.innerHTML = `<i class="fa-solid fa-circle-check text-success"></i> ${activeTab.innerText}`;
+        }
         
     } catch(e) {
         DOM.consoleOutputBox.innerHTML += `<div class="console-message error">Failed to submit: ${e.message}</div>`;
-        DOM.btnSubmitMock.disabled = false;
+        DOM.consoleOutputBox.scrollTop = DOM.consoleOutputBox.scrollHeight;
     }
 }
 
-async function fetchAndShowReport() {
+// Submit Interview finishes the session
+async function finishMockSession() {
+    if (!confirm("Are you sure you want to finish the interview and generate your report?")) return;
+    
     DOM.consoleOutputBox.innerHTML += `<div class="console-message info">Generating final report...</div>`;
     DOM.consoleOutputBox.scrollTop = DOM.consoleOutputBox.scrollHeight;
     
     try {
         const res = await fetch(`${API_BASE}/${state.sessionId}/report`);
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || "Failed to fetch report");
+        }
         const report = await res.json();
         
         DOM.reportScoreNum.innerText = report.overall_score;
@@ -180,7 +202,7 @@ async function fetchAndShowReport() {
         DOM.reportQuestionsContainer.innerHTML = "";
         
         report.evaluations.forEach((ev, i) => {
-            const q = state.mockQuestions[i] || { title: "Question", company: "General", difficulty: "Medium", targetTime: "?", targetSpace: "?" };
+            const q = state.mockQuestions.find(x => x.id === ev.question_id) || { title: ev.title };
             const isCorrect = ev.correctnessScore >= 70;
             const statusIcon = isCorrect ? 'fa-solid fa-circle-check text-success' : 'fa-solid fa-triangle-exclamation text-warning';
             
@@ -191,7 +213,7 @@ async function fetchAndShowReport() {
                     <div class="acc-title-col">
                         <i class="${statusIcon}"></i>
                         <div>
-                            <h4>Q${i + 1}: ${q.title}</h4>
+                            <h4>${q.title}</h4>
                         </div>
                     </div>
                     <div class="acc-status-col">
@@ -213,10 +235,8 @@ async function fetchAndShowReport() {
         
         if(state.timerInterval) clearInterval(state.timerInterval);
         switchPanel("report");
-        DOM.btnSubmitMock.disabled = false;
         
     } catch(e) {
-        alert("Failed to get report: " + e.message);
-        DOM.btnSubmitMock.disabled = false;
+        alert("Failed to get report: " + e.message + ". Have you submitted at least one question?");
     }
 }

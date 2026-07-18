@@ -19,17 +19,18 @@ class PublicQuestion(BaseModel):
     company_tags: list[str]
     prompt: str
     constraints: list[str]
-    starter_code: str
+    starter_code: dict[str, str]
 
 
 class StartInterviewResponse(BaseModel):
     session_id: str
     candidate_name: str
     total_questions: int
-    question: PublicQuestion
+    questions: list[PublicQuestion]
 
 
 class SubmitCodeRequest(BaseModel):
+    question_id: str
     code: str
     language: str = "python"
     time_taken_seconds: Optional[int] = None
@@ -65,8 +66,6 @@ class QuestionEvaluation(BaseModel):
 
 class SubmitCodeResponse(BaseModel):
     evaluation: QuestionEvaluation
-    is_last_question: bool
-    next_question: Optional[PublicQuestion] = None
 
 
 class ReportResponse(BaseModel):

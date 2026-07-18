@@ -40,12 +40,12 @@ def start_interview(req: StartInterviewRequest):
         raise HTTPException(400, "num_questions must be between 1 and 10")
 
     session = store.create_session(req.candidate_name, req.num_questions, req.difficulty, req.topic)
-    first_question = session["questions"][0]
+    questions = [_to_public_question(q, i, len(session["questions"])) for i, q in enumerate(session["questions"])]
     return StartInterviewResponse(
         session_id=session["session_id"],
         candidate_name=session["candidate_name"],
         total_questions=len(session["questions"]),
-        question=_to_public_question(first_question, 0, len(session["questions"])),
+        questions=questions,
     )
 
 
@@ -66,11 +66,9 @@ async def submit_code(session_id: str, req: SubmitCodeRequest):
     if not session:
         raise HTTPException(404, "Session not found")
 
-    idx = session["current_index"]
-    if idx >= len(session["questions"]):
-        raise HTTPException(400, "Interview already complete.")
-
-    question = session["questions"][idx]
+    question = next((q for q in session["questions"] if q["id"] == req.question_id), None)
+    if not question:
+        raise HTTPException(404, "Question not found in session.")
 
     try:
         run_result = await run_against_test_cases(
@@ -78,6 +76,7 @@ async def submit_code(session_id: str, req: SubmitCodeRequest):
             function_name=question["function_name"],
             test_cases=question["test_cases"],
             language=req.language,
+            question=question
         )
     except Judge0Error as e:
         raise HTTPException(502, f"Code execution service error: {e}")
@@ -86,15 +85,8 @@ async def submit_code(session_id: str, req: SubmitCodeRequest):
     evaluation = QuestionEvaluation(**eval_dict)
 
     session["evaluations"].append(eval_dict)
-    session["current_index"] += 1
 
-    is_last = session["current_index"] >= len(session["questions"])
-    next_question = None
-    if not is_last:
-        nxt = session["questions"][session["current_index"]]
-        next_question = _to_public_question(nxt, session["current_index"], len(session["questions"]))
-
-    return SubmitCodeResponse(evaluation=evaluation, is_last_question=is_last, next_question=next_question)
+    return SubmitCodeResponse(evaluation=evaluation)
 
 
 @router.get("/{session_id}/report", response_model=ReportResponse)
@@ -103,7 +95,12 @@ def get_report(session_id: str):
     if not session:
         raise HTTPException(404, "Session not found")
 
-    evaluations = session["evaluations"]
+    # Deduplicate evaluations, keeping the latest for each question
+    latest_evals = {}
+    for e in session["evaluations"]:
+        latest_evals[e["question_id"]] = e
+    evaluations = list(latest_evals.values())
+
     if not evaluations:
         raise HTTPException(400, "No questions answered yet.")
 
