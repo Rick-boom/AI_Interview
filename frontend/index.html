@@ -207,14 +207,10 @@
                     <span class="workspace-title"><i class="fa-solid fa-keyboard"></i> Active Mock Interview
                         Session</span>
                     <span id="session-timer" class="timer"><i class="fa-regular fa-clock"></i> 90:00</span>
-                </div>
                 <div class="workspace-actions">
-                    <button id="btn-run-code" class="btn btn-secondary"><i class="fa-solid fa-play"></i> Run
-                        Code</button>
-                    <button id="btn-save-code" class="btn btn-success"><i class="fa-solid fa-save"></i> Save
-                        Code</button>
-                    <button id="btn-submit-mock" class="btn btn-primary btn-glow"><i
-                            class="fa-solid fa-paper-plane"></i> Finish Interview</button>
+                    <button id="btn-run-code" class="btn btn-secondary" style="display:none;"><i class="fa-solid fa-play"></i> Run Code</button>
+                    <button id="btn-save-code" class="btn btn-success" style="display:none;"><i class="fa-solid fa-save"></i> Save Code</button>
+                    <button id="btn-submit-mock" class="btn btn-primary btn-glow"><i class="fa-solid fa-paper-plane"></i> Submit & Next</button>
                 </div>
             </div>
 
@@ -237,9 +233,8 @@
                         <div class="editor-controls">
                             <label for="lang-select">Language: </label>
                             <select id="lang-select" class="clean-select">
-                                <option value="javascript">JavaScript (Executable)</option>
-                                <option value="python" disabled>Python (Static Evaluation Only)</option>
-                                <option value="cpp" disabled>C++ (Static Evaluation Only)</option>
+                                <option value="python">Python 3 (Executable)</option>
+                                <option value="javascript" disabled>JavaScript (Coming Soon)</option>
                             </select>
                         </div>
                     </div>
@@ -376,6 +371,7 @@
     <script src="js/questions.js"></script>
     <script src="js/evaluator.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/backend.js"></script>
 </body>
 
 </html>
