@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Placement Preparation Portal - Mock Coding Interview</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Navigation Header -->
+    <header class="main-header">
+        <div class="logo">
+            <i class="fa-solid fa-brain-circuit portal-icon"></i>
+            <span>Placement<span class="highlight">Prep</span> AI</span>
+        </div>
+        <nav class="nav-links">
+            <button id="nav-btn-dashboard" class="nav-btn active"><i class="fa-solid fa-chart-line"></i>
+                Dashboard</button>
+            <button id="nav-btn-library" class="nav-btn"><i class="fa-solid fa-book"></i> Question Library</button>
+        </nav>
+        <div class="user-profile">
+            <span class="user-badge"><i class="fa-solid fa-graduation-cap"></i> Candidate</span>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- 1. DASHBOARD PANEL -->
+        <section id="panel-dashboard" class="panel-section active">
+            <div class="dashboard-hero">
+                <div class="hero-text">
+                    <h1>Master Your Coding Interviews</h1>
+                    <p>Challenge yourself with company-specific mock coding assessments. Solve DSA questions in an
+                        industry-grade environment and get graded on correctness and runtime space-time efficiency.</p>
+                    <div class="hero-actions">
+                        <button id="btn-start-mock" class="btn btn-primary btn-glow">
+                            <i class="fa-solid fa-bolt"></i> Start 6-Question Mock Interview
+                        </button>
+                    </div>
+                </div>
+                <div class="hero-illustration">
+                    <div class="portal-badge">
+                        <div class="radar-ping"></div>
+                        <i class="fa-solid fa-laptop-code"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fa-solid fa-trophy"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Average Score</span>
+                        <h2 id="stat-avg-score">--</h2>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon cyan"><i class="fa-solid fa-clipboard-check"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Mocks Completed</span>
+                        <h2 id="stat-mocks-count">0</h2>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fa-solid fa-code"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Solved Problems</span>
+                        <h2 id="stat-solved-count">0</h2>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon yellow"><i class="fa-solid fa-stopwatch"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Target Completion</span>
+                        <h2>60m / Mock</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Splits -->
+            <div class="dashboard-split">
+                <!-- Past History -->
+                <div class="split-card past-history">
+                    <h3><i class="fa-solid fa-history"></i> Recent Mock Reports</h3>
+                    <div class="history-list" id="history-container">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <p>No mock interviews taken yet. Click start to begin your placement preparation!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Focus Area -->
+                <div class="split-card focus-card">
+                    <h3><i class="fa-solid fa-fire"></i> Company Coverage</h3>
+                    <p class="section-desc">Our question base consists of 60 standard questions asked by top tech
+                        giants:</p>
+                    <div class="company-tags-display">
+                        <span class="company-tag big google"><i class="fa-brands fa-google"></i> Google</span>
+                        <span class="company-tag big amazon"><i class="fa-brands fa-amazon"></i> Amazon</span>
+                        <span class="company-tag big microsoft"><i class="fa-brands fa-microsoft"></i> Microsoft</span>
+                        <span class="company-tag big facebook"><i class="fa-brands fa-facebook-f"></i> Facebook</span>
+                        <span class="company-tag big adobe"><i class="fa-solid fa-pen-nib"></i> Adobe</span>
+                        <span class="company-tag big oracle"><i class="fa-solid fa-database"></i> Oracle</span>
+                    </div>
+                    <div class="tips-box">
+                        <h4><i class="fa-regular fa-lightbulb"></i> Preparation Tip</h4>
+                        <p>Solving a linear time O(N) solution gets full marks, whereas an O(N^2) solution will receive
+                            complexity penalties. Aim for optimal data structures!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. QUESTION LIBRARY PANEL -->
+        <section id="panel-library" class="panel-section">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-book"></i> Question Library</h2>
+                <p>Browse and practice our entire collection of 60 curated placement preparation questions.</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-bar">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="lib-search" placeholder="Search questions by title, description...">
+                </div>
+                <div class="select-wrapper">
+                    <select id="lib-filter-difficulty">
+                        <option value="all">All Difficulties</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+                <div class="select-wrapper">
+                    <select id="lib-filter-company">
+                        <option value="all">All Companies</option>
+                        <option value="Google">Google</option>
+                        <option value="Amazon">Amazon</option>
+                        <option value="Microsoft">Microsoft</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Adobe">Adobe</option>
+                        <option value="Oracle">Oracle</option>
+                        <option value="Zoho">Zoho</option>
+                        <option value="Walmart">Walmart</option>
+                    </select>
+                </div>
+                <div class="select-wrapper">
+                    <select id="lib-filter-category">
+                        <option value="all">All Categories</option>
+                        <option value="Arrays">Arrays</option>
+                        <option value="Strings">Strings</option>
+                        <option value="Linked Lists">Linked Lists</option>
+                        <option value="Trees">Trees</option>
+                        <option value="Stacks & Queues">Stacks & Queues</option>
+                        <option value="Dynamic Programming">Dynamic Programming</option>
+                        <option value="Graphs">Graphs</option>
+                        <option value="Recursion">Recursion</option>
+                        <option value="Sorting">Sorting</option>
+                        <option value="Searching">Searching</option>
+                        <option value="Bit Manipulation">Bit Manipulation</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Library Table -->
+            <div class="table-container">
+                <table class="library-table">
+                    <thead>
+                        <tr>
+                            <th>Question Title</th>
+                            <th>Company</th>
+                            <th>Category</th>
+                            <th>Difficulty</th>
+                            <th>Target Complexity</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lib-table-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 3. MOCK WORKSPACE PANEL -->
+        <section id="panel-workspace" class="panel-section full-workspace">
+            <!-- Workspace Top Bar -->
+            <div class="workspace-header">
+                <div class="mock-info">
+                    <span class="workspace-title"><i class="fa-solid fa-keyboard"></i> Active Mock Interview
+                        Session</span>
+                    <span id="session-timer" class="timer"><i class="fa-regular fa-clock"></i> 90:00</span>
+                </div>
+                <div class="workspace-actions">
+                    <button id="btn-run-code" class="btn btn-secondary"><i class="fa-solid fa-play"></i> Run
+                        Code</button>
+                    <button id="btn-save-code" class="btn btn-success"><i class="fa-solid fa-save"></i> Save
+                        Code</button>
+                    <button id="btn-submit-mock" class="btn btn-primary btn-glow"><i
+                            class="fa-solid fa-paper-plane"></i> Finish Interview</button>
+                </div>
+            </div>
+
+            <!-- Split Panel Workspace -->
+            <div class="workspace-split">
+                <!-- Left panel: Question detail & tabs -->
+                <div class="split-left">
+                    <div class="workspace-tabs" id="workspace-tabs-container">
+                        <!-- Populated by JS for Q1-Q6 -->
+                    </div>
+                    <div class="question-detail-body" id="question-details">
+                        <!-- Details loaded by JS -->
+                    </div>
+                </div>
+
+                <!-- Right panel: Code Editor & Console Output -->
+                <div class="split-right">
+                    <div class="editor-header">
+                        <span class="editor-title"><i class="fa-solid fa-code"></i> Workspace Editor</span>
+                        <div class="editor-controls">
+                            <label for="lang-select">Language: </label>
+                            <select id="lang-select" class="clean-select">
+                                <option value="javascript">JavaScript (Executable)</option>
+                                <option value="python" disabled>Python (Static Evaluation Only)</option>
+                                <option value="cpp" disabled>C++ (Static Evaluation Only)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Code Editor container -->
+                    <div id="editor-container" class="editor-box">
+                        <!-- Monaco editor will render here -->
+                        <div class="editor-loader">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <p>Initializing Monaco Editor...</p>
+                        </div>
+                    </div>
+
+                    <!-- Console logs panel -->
+                    <div class="console-panel">
+                        <div class="console-header">
+                            <span><i class="fa-solid fa-terminal"></i> Console Logs / Test Results</span>
+                            <button id="btn-clear-console" class="btn-icon"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div class="console-output" id="console-output-box">
+                            <div class="console-message system">Console ready. Write your solution and click "Run Code"
+                                to test against sample test cases.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. EVALUATION REPORT PANEL -->
+        <section id="panel-report" class="panel-section">
+            <div class="report-header">
+                <h2><i class="fa-solid fa-square-poll-vertical"></i> Mock Interview Performance Report</h2>
+                <p>Detailed evaluation and grading score based on correctness, time complexity, and memory usage.</p>
+            </div>
+
+            <!-- Score Summary Cards -->
+            <div class="report-summary">
+                <div class="score-circle-card">
+                    <div class="score-ring">
+                        <svg width="160" height="160">
+                            <circle cx="80" cy="80" r="70" class="ring-bg"></circle>
+                            <circle cx="80" cy="80" r="70" class="ring-fg" id="report-ring-fg" stroke-dasharray="440"
+                                stroke-dashoffset="440"></circle>
+                        </svg>
+                        <div class="score-text">
+                            <span id="report-score-num">--</span>
+                            <span class="score-denominator">/100</span>
+                        </div>
+                    </div>
+                    <div class="grade-label" id="report-grade">Outstanding</div>
+                </div>
+
+                <div class="report-metrics">
+                    <div class="metric-progress-bar">
+                        <div class="bar-header">
+                            <span><i class="fa-solid fa-circle-check"></i> Correctness (40%)</span>
+                            <span id="report-val-correctness">0%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill bg-correct" id="report-fill-correctness" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="metric-progress-bar">
+                        <div class="bar-header">
+                            <span><i class="fa-solid fa-gauge-high"></i> Time Complexity Score (30%)</span>
+                            <span id="report-val-time">0%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill bg-time" id="report-fill-time" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="metric-progress-bar">
+                        <div class="bar-header">
+                            <span><i class="fa-solid fa-memory"></i> Space Complexity Score (30%)</span>
+                            <span id="report-val-space">0%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill bg-space" id="report-fill-space" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Individual Question Breakdowns -->
+            <div class="questions-breakdown-list">
+                <h3><i class="fa-solid fa-list-check"></i> Question-by-Question Grading</h3>
+                <div class="breakdown-accordions" id="report-questions-container">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="report-actions">
+                <button id="btn-report-close" class="btn btn-primary"><i class="fa-solid fa-circle-chevron-left"></i>
+                    Return to Dashboard</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Monaco Loader CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script>
+        // Load Monaco Editor
+        let monacoEditorInstance = null;
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            // Remove the loading banner once ready
+            const container = document.getElementById('editor-container');
+            container.innerHTML = '';
+
+            // Create a default instance
+            monacoEditorInstance = monaco.editor.create(container, {
+                value: '// Select a question to load templates',
+                language: 'javascript',
+                theme: 'vs-dark',
+                fontSize: 14,
+                fontFamily: 'JetBrains Mono, Courier New, monospace',
+                automaticLayout: true,
+                minimap: { enabled: false },
+                cursorBlinking: 'smooth',
+                lineHeight: 22,
+                tabSize: 4,
+                roundedSelection: true
+            });
+
+            // Signal application that Monaco is ready
+            window.isMonacoReady = true;
+            if (window.onMonacoLoad) {
+                window.onMonacoLoad();
+            }
+        });
+    </script>
+
+    <!-- Code Files -->
+    <script src="js/questions.js"></script>
+    <script src="js/evaluator.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
