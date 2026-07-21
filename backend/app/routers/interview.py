@@ -1,6 +1,10 @@
+import csv
 import time
+import uuid
+from datetime import datetime, timezone
+from io import StringIO
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 
 from app import store
 from app.evaluator import evaluate_submission
@@ -81,10 +85,39 @@ async def submit_code(session_id: str, req: SubmitCodeRequest):
     except Judge0Error as e:
         raise HTTPException(502, f"Code execution service error: {e}")
 
-    eval_dict = await evaluate_submission(question, req.code, run_result)
+    # ── Resolve telemetry to a plain dict for the evaluator ──────────────────
+    tel_dict = {
+        "compilation_retries":   req.telemetry.compilation_retries,
+        "paste_count":           req.telemetry.paste_count,
+        "time_to_first_compile": req.telemetry.time_to_first_compile,
+    }
+
+    # ── Multimodal evaluation (passes verbal + telemetry to Claude) ──────────
+    eval_dict = await evaluate_submission(
+        question=question,
+        candidate_code=req.code,
+        run_result=run_result,
+        verbal_explanation=req.verbal_explanation,
+        telemetry=tel_dict,
+    )
+
     evaluation = QuestionEvaluation(**eval_dict)
 
-    session["evaluations"].append(eval_dict)
+    # ── Persist evaluation + research metadata to the session ────────────────
+    session_eval_record = {
+        **eval_dict,
+        "_submission_id":     str(uuid.uuid4()),
+        "_language":          req.language,
+        "_time_taken_seconds": req.time_taken_seconds,
+        "_telemetry":         tel_dict,
+        "_has_verbal":        bool(
+            req.verbal_explanation
+            and req.verbal_explanation.strip()
+            and req.verbal_explanation.strip() != "No verbal explanation provided."
+        ),
+        "_timestamp":         datetime.now(timezone.utc).isoformat(),
+    }
+    session["evaluations"].append(session_eval_record)
 
     return SubmitCodeResponse(evaluation=evaluation)
 
@@ -125,4 +158,98 @@ def get_report(session_id: str):
         duration_seconds=duration,
         evaluations=[QuestionEvaluation(**e) for e in evaluations],
         summary=summary,
+    )
+
+
+# ─── Research Data CSV Export ──────────────────────────────────────────────────
+
+_CSV_HEADERS = [
+    "submission_id",
+    "session_id",
+    "candidate_name",
+    "question_id",
+    "question_title",
+    "difficulty",
+    "language",
+    "overall_score",
+    "correctness_score",
+    "efficiency_score",
+    "code_quality_score",
+    "verbal_clarity_score",
+    "alignment_score",
+    "bluffing_detected",
+    "confidence_percentage",
+    "bias_audit_passed",
+    "tests_passed",
+    "tests_total",
+    "time_to_first_compile_s",
+    "compilation_retries",
+    "paste_count",
+    "time_taken_seconds",
+    "has_verbal_explanation",
+    "timestamp",
+]
+
+
+@router.get("/export-research-data")
+def export_research_data():
+    """
+    Export all session evaluation data as a CSV file ready for research analysis.
+
+    Each row represents one question submission (latest per question per session).
+    Maps to the ResearchRecord schema. Download via:
+        GET /api/interview/export-research-data
+    """
+    sessions = store.get_all_sessions()
+
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=_CSV_HEADERS, extrasaction="ignore")
+    writer.writeheader()
+
+    for session in sessions:
+        # Deduplicate: latest submission per question
+        latest_evals: dict[str, dict] = {}
+        for e in session.get("evaluations", []):
+            latest_evals[e["question_id"]] = e
+
+        # Find difficulty for each question from session's question list
+        diff_lookup = {q["id"]: q.get("difficulty", "Unknown") for q in session.get("questions", [])}
+
+        for qid, ev in latest_evals.items():
+            tel = ev.get("_telemetry") or {}
+            writer.writerow({
+                "submission_id":          ev.get("_submission_id", ""),
+                "session_id":             session["session_id"],
+                "candidate_name":         session["candidate_name"],
+                "question_id":            qid,
+                "question_title":         ev.get("title", ""),
+                "difficulty":             diff_lookup.get(qid, "Unknown"),
+                "language":               ev.get("_language", ""),
+                "overall_score":          ev.get("score", 0),
+                "correctness_score":      ev.get("correctness_score", 0),
+                "efficiency_score":       ev.get("efficiency_score", 0),
+                "code_quality_score":     ev.get("code_quality_score", 0),
+                "verbal_clarity_score":   ev.get("verbal_clarity_score", ""),
+                "alignment_score":        ev.get("alignment_score", ""),
+                "bluffing_detected":      ev.get("bluffing_detected", ""),
+                "confidence_percentage":  ev.get("confidence_percentage", ""),
+                "bias_audit_passed":      ev.get("bias_audit_passed", ""),
+                "tests_passed":           ev.get("tests_passed", 0),
+                "tests_total":            ev.get("tests_total", 0),
+                "time_to_first_compile_s": tel.get("time_to_first_compile", ""),
+                "compilation_retries":    tel.get("compilation_retries", 0),
+                "paste_count":            tel.get("paste_count", 0),
+                "time_taken_seconds":     ev.get("_time_taken_seconds", ""),
+                "has_verbal_explanation": ev.get("_has_verbal", False),
+                "timestamp":              ev.get("_timestamp", ""),
+            })
+
+    csv_content = output.getvalue()
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=interview_research_data.csv",
+            "Cache-Control": "no-cache",
+        },
     )

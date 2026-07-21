@@ -56,3 +56,8 @@ def get_session(session_id: str) -> Optional[dict]:
 
 def get_question_by_id(question_id: str) -> Optional[dict]:
     return _QUESTIONS_BY_ID.get(question_id)
+
+
+def get_all_sessions() -> list[dict]:
+    """Return all sessions (for research data export). Read-only view."""
+    return list(_SESSIONS.values())
