@@ -10,7 +10,13 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon.png">
+    <meta name="theme-color" content="#6366f1">
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -61,7 +67,7 @@
     <header class="main-header glass-panel" role="banner">
         <div class="logo">
             <div class="logo-icon">
-                <i class="fa-solid fa-microchip-ai"></i>
+                <img src="/icon.png" alt="PlacementPrep AI" style="width:28px;height:28px;object-fit:contain;border-radius:6px;">
             </div>
             <span>Placement<span class="logo-highlight">Prep</span> AI</span>
         </div>
@@ -470,10 +476,43 @@
             container.innerHTML = ''; // Remove loader
 
             // Create editor with Python as default (matches backend starter_code)
+            // Define custom light periwinkle theme
+            monaco.editor.defineTheme('periwinkle-light', {
+                base: 'vs',
+                inherit: true,
+                rules: [
+                    { token: 'comment', foreground: '9ca3af', fontStyle: 'italic' },
+                    { token: 'keyword', foreground: '6366f1', fontStyle: 'bold' },
+                    { token: 'string', foreground: '059669' },
+                    { token: 'number', foreground: 'f59e0b' },
+                    { token: 'type', foreground: '8b5cf6' },
+                    { token: 'function', foreground: '2563eb' },
+                    { token: 'variable', foreground: '1e293b' },
+                    { token: 'operator', foreground: '6366f1' },
+                    { token: 'delimiter', foreground: '64748b' },
+                ],
+                colors: {
+                    'editor.background': '#f8f9ff',
+                    'editor.foreground': '#1e293b',
+                    'editor.lineHighlightBackground': '#eef0ff',
+                    'editorLineNumber.foreground': '#a0aec0',
+                    'editorLineNumber.activeForeground': '#6366f1',
+                    'editor.selectionBackground': '#c7d2fe',
+                    'editor.inactiveSelectionBackground': '#dde4ff',
+                    'editorCursor.foreground': '#6366f1',
+                    'editorWhitespace.foreground': '#e2e8f0',
+                    'editorBracketMatch.background': '#c7d2fe',
+                    'editorBracketMatch.border': '#6366f1',
+                    'scrollbarSlider.background': '#c7d2fe80',
+                    'scrollbarSlider.hoverBackground': '#a5b4fc',
+                    'scrollbarSlider.activeBackground': '#818cf8',
+                }
+            });
+
             window.monacoEditorInstance = monaco.editor.create(container, {
                 value:            '# Select a question to load the starter template',
-                language:         'python',   // Fixed: was 'javascript'
-                theme:            'vs-dark',
+                language:         'python',
+                theme:            'periwinkle-light',
                 fontSize:         14,
                 fontFamily:       '"JetBrains Mono", "Fira Code", "Courier New", monospace',
                 fontLigatures:    true,
@@ -500,7 +539,7 @@
 
     <!-- ═══ App Scripts ══════════════════════════════════════════════════════ -->
     <!-- NOTE: questions.js is the local JS question bank (for practice mode) -->
-    <!-- <script src="js/questions.js"></script> -->
+    <script src="js/questions.js"></script>
     <script src="js/proctor.js"></script>
     <script src="js/app.js"></script>
     <script src="js/backend.js"></script>

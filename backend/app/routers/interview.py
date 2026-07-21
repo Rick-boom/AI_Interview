@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Response
 
 from app import store
 from app.evaluator import evaluate_submission
-from app.judge0_client import Judge0Error, run_against_test_cases
+from app.piston_client import CodeExecutionError, run_against_test_cases
 from app.schemas import (
     PublicQuestion,
     QuestionEvaluation,
@@ -82,7 +82,7 @@ async def submit_code(session_id: str, req: SubmitCodeRequest):
             language=req.language,
             question=question
         )
-    except Judge0Error as e:
+    except CodeExecutionError as e:
         raise HTTPException(502, f"Code execution service error: {e}")
 
     # ── Resolve telemetry to a plain dict for the evaluator ──────────────────
@@ -92,7 +92,7 @@ async def submit_code(session_id: str, req: SubmitCodeRequest):
         "time_to_first_compile": req.telemetry.time_to_first_compile,
     }
 
-    # ── Multimodal evaluation (passes verbal + telemetry to Claude) ──────────
+    # ── Multimodal evaluation (passes verbal + telemetry to Gemini) ──────────
     eval_dict = await evaluate_submission(
         question=question,
         candidate_code=req.code,

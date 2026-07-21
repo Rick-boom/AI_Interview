@@ -583,8 +583,6 @@ function _alignClass(score) {
 
 // ─── Finish Mock Session (Submit Interview) ───────────────────────────────────
 async function finishMockSession() {
-    if (!confirm('Are you sure you want to finish the interview and generate your report?\n\nAny un-submitted questions will receive 0 points.')) return;
-
     // Stop the timer
     if (state.timerInterval) {
         clearInterval(state.timerInterval);
@@ -780,8 +778,9 @@ async function finishMockSession() {
         switchPanel('report');
 
     } catch (e) {
-        alert('Failed to generate report: ' + e.message +
-              '\n\nHint: Make sure you have submitted at least one question with "Run Code / Submit".');
+        DOM.consoleOutputBox.innerHTML +=
+            `<div class="console-message error"><i class="fa-solid fa-triangle-exclamation"></i> Failed to generate report: ${sanitizeHTML(e.message)}<br><br>Hint: Make sure you have submitted at least one question with "Run & Submit".</div>`;
+        DOM.consoleOutputBox.scrollTop = DOM.consoleOutputBox.scrollHeight;
     }
 }
 

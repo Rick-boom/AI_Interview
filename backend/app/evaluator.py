@@ -1,6 +1,6 @@
 """
 Turns (question, candidate code, test-execution results, verbal explanation, telemetry)
-into a scored, structured evaluation. Uses Claude to judge *approach* and *complexity* --
+into a scored, structured evaluation. Uses Gemini to judge *approach* and *complexity* --
 things a simple diff against the optimal solution can't fairly capture,
 since two correct solutions can look completely different.
 
@@ -8,26 +8,27 @@ Research Project: Multimodal Automated Technical Assessment
 Hypothesis: Code + Verbal Explanation + Telemetry increases grading reliability,
             detects algorithmic bluffing, and reduces evaluator bias vs code-only.
 
-If no ANTHROPIC_API_KEY is set, falls back to a heuristic (test pass rate
+If no GEMINI_API_KEY is set, falls back to a heuristic (test pass rate
 only) so the rest of the app still works end to end during setup.
 """
 import json
 import re
 from typing import Optional
 
-from anthropic import AsyncAnthropic
+from google import genai
+from google.genai import types
 
 from app.config import settings
 
-_client: Optional[AsyncAnthropic] = None
+_client: Optional[genai.Client] = None
 
 
-def _get_client() -> Optional[AsyncAnthropic]:
+def _get_client() -> Optional[genai.Client]:
     global _client
-    if not settings.ANTHROPIC_API_KEY:
+    if not settings.GEMINI_API_KEY:
         return None
     if _client is None:
-        _client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+        _client = genai.Client(api_key=settings.GEMINI_API_KEY)
     return _client
 
 
@@ -118,7 +119,7 @@ def _heuristic_evaluation(question: dict, tests_passed: int, tests_total: int) -
         "correctness_score": correctness,
         "efficiency_score": correctness,  # can't judge efficiency without an LLM
         "code_quality_score": 70,
-        "detected_approach": "Not evaluated (ANTHROPIC_API_KEY not configured)",
+        "detected_approach": "Not evaluated (GEMINI_API_KEY not configured)",
         "detected_time_complexity": "Unknown",
         "detected_space_complexity": "Unknown",
         "strengths": (["Passed all visible test cases."] if pass_rate == 1 else []),
@@ -126,7 +127,7 @@ def _heuristic_evaluation(question: dict, tests_passed: int, tests_total: int) -
             [] if pass_rate == 1 else [f"Failed {tests_total - tests_passed} of {tests_total} test cases."]
         ),
         "feedback": (
-            "Set ANTHROPIC_API_KEY in the backend .env to get real interviewer-style feedback on "
+            "Set GEMINI_API_KEY in the backend .env to get real interviewer-style feedback on "
             "approach and complexity. For now this score reflects test-case pass rate only."
         ),
     }
@@ -152,7 +153,7 @@ async def evaluate_submission(
     ----------
     question           : Full question dict (from store, including optimal solution).
     candidate_code     : The candidate's source code.
-    run_result         : Output from Judge0 (test results, stderr, status).
+    run_result         : Output from Piston (test results, stderr, status).
     verbal_explanation : Transcribed voice explanation from the frontend (optional).
     telemetry          : Cognitive load signals dict (optional).
                          Keys: compilation_retries, paste_count, time_to_first_compile.
@@ -185,9 +186,9 @@ async def evaluate_submission(
                 "optimal_space_complexity":  question["optimal_space_complexity"],
                 "optimal_approach":          question["optimal_approach"],
                 "test_run_results":          results,
-                "judge0_stderr":             run_result.get("stderr"),
-                "judge0_compile_error":      run_result.get("compile_error"),
-                "judge0_status":             run_result.get("status"),
+                "piston_stderr":             run_result.get("stderr"),
+                "piston_compile_error":      run_result.get("compile_error"),
+                "piston_status":             run_result.get("status"),
                 # ── Research inputs ──
                 "verbal_explanation":        verbal_explanation,
                 "telemetry": {
@@ -208,23 +209,26 @@ async def evaluate_submission(
                 "optimal_space_complexity":  question["optimal_space_complexity"],
                 "optimal_approach":          question["optimal_approach"],
                 "test_run_results":          results,
-                "judge0_stderr":             run_result.get("stderr"),
-                "judge0_compile_error":      run_result.get("compile_error"),
-                "judge0_status":             run_result.get("status"),
+                "piston_stderr":             run_result.get("stderr"),
+                "piston_compile_error":      run_result.get("compile_error"),
+                "piston_status":             run_result.get("status"),
             })
 
-        response = await client.messages.create(
-            model=settings.CLAUDE_MODEL,
-            max_tokens=1500,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_content}],
-        )
-        text = "".join(block.text for block in response.content if block.type == "text")
         try:
+            response = client.models.generate_content(
+                model=settings.GEMINI_MODEL,
+                contents=user_content,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    max_output_tokens=1500,
+                    temperature=0.2,
+                ),
+            )
+            text = response.text or ""
             llm_eval = _extract_json(text)
-        except (json.JSONDecodeError, AttributeError):
+        except Exception as e:
             llm_eval = _heuristic_evaluation(question, tests_passed, tests_total)
-            llm_eval["feedback"] = "Evaluator returned an unparseable response; showing pass-rate score instead."
+            llm_eval["feedback"] = f"AI Evaluation failed ({e.__class__.__name__}: {str(e)}). Showing pass-rate score instead."
 
     # ── Compute weighted overall score ─────────────────────────────────────────
     correctness = int(llm_eval.get("correctness_score", 0))
