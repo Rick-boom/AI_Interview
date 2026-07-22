@@ -430,11 +430,14 @@ async function runActiveQuestion() {
 
     const timeTaken = (90 * 60) - (state.timeLeft ?? 0);
 
-    DOM.consoleOutputBox.innerHTML += `
-        <div class="console-message info">
-            <i class="fa-solid fa-spinner fa-spin"></i>
-            Submitting <strong>${sanitizeHTML(q.title)}</strong> (${sub.lang.toUpperCase()}) to backend…
-        </div>`;
+    // Show a loading row we can REMOVE once the result arrives, so it never looks stuck.
+    if (DOM.btnRunCode) DOM.btnRunCode.disabled = true;
+    const loadingEl = document.createElement('div');
+    loadingEl.className = 'console-message info';
+    loadingEl.innerHTML =
+        `<i class="fa-solid fa-spinner fa-spin"></i> Running <strong>${sanitizeHTML(q.title)}</strong> ` +
+        `(${sub.lang.toUpperCase()})… compiling &amp; running test cases`;
+    DOM.consoleOutputBox.appendChild(loadingEl);
     DOM.consoleOutputBox.scrollTop = DOM.consoleOutputBox.scrollHeight;
 
     // ── Collect verbal explanation (from voice textarea) ──────────────────
@@ -467,12 +470,18 @@ async function runActiveQuestion() {
         const data = await res.json();
         const ev   = data.evaluation;
 
+        // Result is in — remove the "running…" row so it doesn't look stuck forever.
+        loadingEl.remove();
+
         // Backend returns snake_case fields — read them correctly
         const correctness = ev.correctness_score ?? ev.correctnessScore ?? 0;
         const efficiency  = ev.efficiency_score  ?? ev.efficiencyScore  ?? 0;
         const quality     = ev.code_quality_score ?? ev.codeQualityScore ?? 0;
-        const testsPassed = ev.tests_passed ?? 0;
-        const testsTotal  = ev.tests_total  ?? 0;
+        const testsPassed = data.tests_passed ?? ev.tests_passed ?? 0;
+        const testsTotal  = data.tests_total  ?? ev.tests_total  ?? 0;
+
+        // LeetCode-style per-test-case breakdown (+ compile / runtime errors)
+        const testsHtml = _buildTestBreakdown(data, testsPassed, testsTotal);
 
         // ── XAI fields (only present when verbal explanation was given) ────
         const hasXAI      = ev.alignment_score != null;
@@ -538,6 +547,7 @@ async function runActiveQuestion() {
                         Tests: ${testsPassed}/${testsTotal}
                     </div>
                 </div>
+                ${testsHtml}
                 ${ev.detected_time_complexity ? `
                 <div class="result-complexity">
                     <span>⏱ Detected Time: <strong>${sanitizeHTML(ev.detected_time_complexity)}</strong>
@@ -567,10 +577,83 @@ async function runActiveQuestion() {
         renderWorkspaceTabs();
 
     } catch (e) {
+        loadingEl.remove();
         DOM.consoleOutputBox.innerHTML +=
             `<div class="console-message error"><i class="fa-solid fa-triangle-exclamation"></i> Failed: ${sanitizeHTML(e.message)}</div>`;
         DOM.consoleOutputBox.scrollTop = DOM.consoleOutputBox.scrollHeight;
+    } finally {
+        if (DOM.btnRunCode) DOM.btnRunCode.disabled = false;
     }
+}
+
+/** Formats a JSON value for compact display in a test-case row. */
+function _fmtVal(v) {
+    let s;
+    try { s = JSON.stringify(v); } catch (_) { s = String(v); }
+    if (s == null) s = String(v);
+    if (s.length > 200) s = s.slice(0, 200) + '…';
+    return sanitizeHTML(s);
+}
+
+/** Builds a LeetCode-style verdict banner + per-test-case list for the console. */
+function _buildTestBreakdown(data, passed, total) {
+    // A compile error is the most important thing to surface — show it loudly.
+    if (data.compile_error) {
+        return `
+            <div class="tc-block" style="margin-top:.6rem;">
+                <div style="font-weight:700;color:#dc2626;margin-bottom:.35rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Compilation Error — your code did not build
+                </div>
+                <pre style="white-space:pre-wrap;background:#1e1e2e;color:#fca5a5;padding:.6rem .75rem;border-radius:8px;font-size:.78rem;overflow:auto;max-height:220px;">${sanitizeHTML(String(data.compile_error))}</pre>
+            </div>`;
+    }
+
+    const rows = Array.isArray(data.test_results) ? data.test_results : [];
+    const allPass = total > 0 && passed === total;
+    const verdictColor = allPass ? '#16a34a' : '#dc2626';
+    const verdictText  = allPass ? 'Accepted' : (data.status || 'Wrong Answer');
+    const verdictIcon  = allPass ? 'fa-circle-check' : 'fa-circle-xmark';
+
+    let rowsHtml = '';
+    rows.forEach((r, i) => {
+        const ok = !!r.passed;
+        const color = ok ? '#16a34a' : '#dc2626';
+        const icon  = ok ? 'fa-circle-check' : 'fa-circle-xmark';
+        const ms = (r.elapsed_ms != null)
+            ? ` <span style="color:#94a3b8;font-weight:400;font-size:.72rem;">${r.elapsed_ms} ms</span>` : '';
+        let detail = `<div style="color:#64748b;margin-top:.15rem;"><strong>Input:</strong> ${_fmtVal(r.input)}</div>`;
+        if (r.error) {
+            detail += `<div style="color:#dc2626;"><strong>Error:</strong> ${sanitizeHTML(String(r.error))}</div>`;
+        } else if (!ok) {
+            detail += `<div style="color:#475569;"><strong>Expected:</strong> ${_fmtVal(r.expected)}</div>`;
+            // The C++ runner reports only pass/fail (not the returned value), so only
+            // show "Got" when we actually captured an output value.
+            if (r.output !== null && r.output !== undefined) {
+                detail += `<div style="color:#475569;"><strong>Got:</strong> <span style="color:#dc2626;">${_fmtVal(r.output)}</span></div>`;
+            }
+        }
+        rowsHtml += `
+            <div style="padding:.45rem .6rem;border-radius:8px;background:rgba(148,163,184,.10);margin-bottom:.35rem;font-size:.82rem;">
+                <div style="font-weight:600;color:${color};">
+                    <i class="fa-solid ${icon}"></i> Case ${i + 1}: ${ok ? 'Passed' : 'Failed'}${ms}
+                </div>
+                ${detail}
+            </div>`;
+    });
+
+    const stderrHtml = (data.stderr && !allPass)
+        ? `<details style="margin-top:.35rem;"><summary style="cursor:pointer;color:#94a3b8;font-size:.78rem;">Show program output (stderr)</summary>` +
+          `<pre style="white-space:pre-wrap;background:#1e1e2e;color:#cbd5e1;padding:.5rem;border-radius:8px;font-size:.75rem;max-height:160px;overflow:auto;">${sanitizeHTML(String(data.stderr))}</pre></details>`
+        : '';
+
+    return `
+        <div class="tc-block" style="margin-top:.6rem;">
+            <div style="font-weight:700;color:${verdictColor};margin-bottom:.45rem;">
+                <i class="fa-solid ${verdictIcon}"></i> ${sanitizeHTML(verdictText)} — ${passed} / ${total} test cases passed
+            </div>
+            ${rowsHtml}
+            ${stderrHtml}
+        </div>`;
 }
 
 /** Maps an alignment score to a CSS modifier class for colour-coding. */

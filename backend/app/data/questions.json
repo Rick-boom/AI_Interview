@@ -4,7 +4,11 @@
     "title": "Two Sum",
     "difficulty": "Easy",
     "topic": "Arrays & Hashing",
-    "company_tags": ["Google", "Amazon", "Adobe"],
+    "company_tags": [
+      "Google",
+      "Amazon",
+      "Adobe"
+    ],
     "prompt": "Given an array of integers `nums` and an integer `target`, return the indices of the two numbers such that they add up to `target`. You may assume each input has exactly one solution, and you may not use the same element twice.",
     "constraints": [
       "2 <= nums.length <= 10^4",
@@ -17,10 +21,168 @@
       "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // write your solution here\n        return {};\n    }\n};"
     },
     "test_cases": [
-      { "input": [[2, 7, 11, 15], 9], "expected": [0, 1] },
-      { "input": [[3, 2, 4], 6], "expected": [1, 2] },
-      { "input": [[3, 3], 6], "expected": [0, 1] },
-      { "input": [[-1, -2, -3, -4, -5], -8], "expected": [2, 4] }
+      {
+        "input": [
+          [
+            2,
+            7,
+            11,
+            15
+          ],
+          9
+        ],
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "input": [
+          [
+            3,
+            2,
+            4
+          ],
+          6
+        ],
+        "expected": [
+          1,
+          2
+        ]
+      },
+      {
+        "input": [
+          [
+            3,
+            3
+          ],
+          6
+        ],
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "input": [
+          [
+            -1,
+            -2,
+            -3,
+            -4,
+            -5
+          ],
+          -8
+        ],
+        "expected": [
+          2,
+          4
+        ]
+      },
+      {
+        "input": [
+          [
+            1,
+            2
+          ],
+          3
+        ],
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "input": [
+          [
+            0,
+            4,
+            3,
+            0
+          ],
+          0
+        ],
+        "expected": [
+          0,
+          3
+        ]
+      },
+      {
+        "input": [
+          [
+            -3,
+            4,
+            3,
+            90
+          ],
+          0
+        ],
+        "expected": [
+          0,
+          2
+        ]
+      },
+      {
+        "input": [
+          [
+            5,
+            75,
+            25
+          ],
+          100
+        ],
+        "expected": [
+          1,
+          2
+        ]
+      },
+      {
+        "input": [
+          [
+            2,
+            5,
+            5,
+            11
+          ],
+          10
+        ],
+        "expected": [
+          1,
+          2
+        ]
+      },
+      {
+        "input": [
+          [
+            4,
+            6,
+            1,
+            3
+          ],
+          10
+        ],
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "input": [
+          [
+            1,
+            3,
+            5,
+            7,
+            9,
+            11
+          ],
+          14
+        ],
+        "expected": [
+          2,
+          4
+        ]
+      }
     ],
     "optimal_solution": {
       "python": "def two_sum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []\n",
@@ -29,27 +191,101 @@
     "optimal_time_complexity": "O(n)",
     "optimal_space_complexity": "O(n)",
     "optimal_approach": "Single-pass hashmap storing value -> index; check for the complement as you go instead of doing a nested-loop brute force (O(n^2)).",
-    "cpp_driver": "\n#include <iostream>\n#include <vector>\n#include <unordered_map>\n#include <chrono>\n#include <string>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    \n    vector<pair<pair<vector<int>, int>, vector<int>>> cases = {\n        {{{2, 7, 11, 15}, 9}, {0, 1}},\n        {{{3, 2, 4}, 6}, {1, 2}},\n        {{{3, 3}, 6}, {0, 1}},\n        {{{-1, -2, -3, -4, -5}, -8}, {2, 4}}\n    };\n    \n    for(int i = 0; i < cases.size(); i++) {\n        auto start = chrono::high_resolution_clock::now();\n        vector<int> out = sol.twoSum(cases[i].first.first, cases[i].first.second);\n        auto end = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(end - start).count();\n        \n        bool passed = (out == cases[i].second);\n        // print json directly\n        cout << \"{\\\"test\\\": \" << i << \", \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n        if(i < cases.size() - 1) cout << \",\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
+    "cpp_driver": "#include <iostream>\n#include <vector>\n#include <string>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    {\n        vector<int> arg0 = {2, 7, 11, 15}; int arg1 = 9;\n        vector<int> expected = {0, 1};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 0, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {3, 2, 4}; int arg1 = 6;\n        vector<int> expected = {1, 2};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 1, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {3, 3}; int arg1 = 6;\n        vector<int> expected = {0, 1};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 2, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {-1, -2, -3, -4, -5}; int arg1 = -8;\n        vector<int> expected = {2, 4};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 3, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {1, 2}; int arg1 = 3;\n        vector<int> expected = {0, 1};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 4, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {0, 4, 3, 0}; int arg1 = 0;\n        vector<int> expected = {0, 3};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 5, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {-3, 4, 3, 90}; int arg1 = 0;\n        vector<int> expected = {0, 2};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 6, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {5, 75, 25}; int arg1 = 100;\n        vector<int> expected = {1, 2};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 7, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {2, 5, 5, 11}; int arg1 = 10;\n        vector<int> expected = {1, 2};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 8, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {4, 6, 1, 3}; int arg1 = 10;\n        vector<int> expected = {0, 1};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 9, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {1, 3, 5, 7, 9, 11}; int arg1 = 14;\n        vector<int> expected = {2, 4};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.twoSum(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 10, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
   },
   {
     "id": "valid-parentheses",
     "title": "Valid Parentheses",
     "difficulty": "Easy",
     "topic": "Stacks",
-    "company_tags": ["Microsoft", "Amazon", "Bloomberg"],
+    "company_tags": [
+      "Microsoft",
+      "Amazon",
+      "Bloomberg"
+    ],
     "prompt": "Given a string `s` containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. Brackets must close in the correct order.",
-    "constraints": ["1 <= s.length <= 10^4", "s consists only of bracket characters"],
+    "constraints": [
+      "1 <= s.length <= 10^4",
+      "s consists only of bracket characters"
+    ],
     "function_name": "is_valid",
     "starter_code": {
       "python": "def is_valid(s):\n    # write your solution here\n    pass\n",
       "cpp": "class Solution {\npublic:\n    bool isValid(string s) {\n        // write your solution here\n        return false;\n    }\n};"
     },
     "test_cases": [
-      { "input": ["()"], "expected": true },
-      { "input": ["()[]{}"], "expected": true },
-      { "input": ["(]"], "expected": false },
-      { "input": ["([)]"], "expected": false },
-      { "input": ["{[]}"], "expected": true }
+      {
+        "input": [
+          "()"
+        ],
+        "expected": true
+      },
+      {
+        "input": [
+          "()[]{}"
+        ],
+        "expected": true
+      },
+      {
+        "input": [
+          "(]"
+        ],
+        "expected": false
+      },
+      {
+        "input": [
+          "([)]"
+        ],
+        "expected": false
+      },
+      {
+        "input": [
+          "{[]}"
+        ],
+        "expected": true
+      },
+      {
+        "input": [
+          ""
+        ],
+        "expected": true
+      },
+      {
+        "input": [
+          "("
+        ],
+        "expected": false
+      },
+      {
+        "input": [
+          "]"
+        ],
+        "expected": false
+      },
+      {
+        "input": [
+          "(((((())))))"
+        ],
+        "expected": true
+      },
+      {
+        "input": [
+          "(){}}{"
+        ],
+        "expected": false
+      },
+      {
+        "input": [
+          "([{}])"
+        ],
+        "expected": true
+      },
+      {
+        "input": [
+          "((("
+        ],
+        "expected": false
+      }
     ],
     "optimal_solution": {
       "python": "def is_valid(s):\n    stack = []\n    pairs = {')': '(', ']': '[', '}': '{'}\n    for ch in s:\n        if ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n        else:\n            stack.append(ch)\n    return not stack\n",
@@ -58,26 +294,161 @@
     "optimal_time_complexity": "O(n)",
     "optimal_space_complexity": "O(n)",
     "optimal_approach": "Use a stack to track open brackets; on a closing bracket, check the top of the stack matches. String is valid only if the stack is empty at the end.",
-    "cpp_driver": "\n#include <iostream>\n#include <vector>\n#include <stack>\n#include <string>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    \n    vector<pair<string, bool>> cases = {\n        {\"()\", true},\n        {\"()[]{}\", true},\n        {\"(]\", false},\n        {\"([)]\", false},\n        {\"{[]}\", true}\n    };\n    \n    for(int i = 0; i < cases.size(); i++) {\n        auto start = chrono::high_resolution_clock::now();\n        bool out = sol.isValid(cases[i].first);\n        auto end = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(end - start).count();\n        \n        bool passed = (out == cases[i].second);\n        cout << \"{\\\"test\\\": \" << i << \", \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n        if(i < cases.size() - 1) cout << \",\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
+    "cpp_driver": "#include <iostream>\n#include <vector>\n#include <string>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    {\n        string arg0 = \"()\";\n        bool expected = true;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 0, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"()[]{}\";\n        bool expected = true;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 1, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"(]\";\n        bool expected = false;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 2, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"([)]\";\n        bool expected = false;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 3, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"{[]}\";\n        bool expected = true;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 4, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"\";\n        bool expected = true;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 5, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"(\";\n        bool expected = false;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 6, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"]\";\n        bool expected = false;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 7, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"(((((())))))\";\n        bool expected = true;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 8, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"(){}}{\";\n        bool expected = false;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 9, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"([{}])\";\n        bool expected = true;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 10, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"(((\";\n        bool expected = false;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.isValid(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 11, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
   },
   {
     "id": "binary-search",
     "title": "Binary Search",
     "difficulty": "Easy",
     "topic": "Binary Search",
-    "company_tags": ["Amazon", "Flipkart"],
+    "company_tags": [
+      "Amazon",
+      "Flipkart"
+    ],
     "prompt": "Given a sorted array of unique integers `nums` and an integer `target`, return the index of `target` if it exists in `nums`, else return -1. Your algorithm must run in O(log n) time.",
-    "constraints": ["1 <= nums.length <= 10^4", "nums is sorted in ascending order"],
+    "constraints": [
+      "1 <= nums.length <= 10^4",
+      "nums is sorted in ascending order"
+    ],
     "function_name": "search",
     "starter_code": {
       "python": "def search(nums, target):\n    # write your solution here\n    pass\n",
       "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        // write your solution here\n        return -1;\n    }\n};"
     },
     "test_cases": [
-      { "input": [[-1, 0, 3, 5, 9, 12], 9], "expected": 4 },
-      { "input": [[-1, 0, 3, 5, 9, 12], 2], "expected": -1 },
-      { "input": [[5], 5], "expected": 0 },
-      { "input": [[], 5], "expected": -1 }
+      {
+        "input": [
+          [
+            -1,
+            0,
+            3,
+            5,
+            9,
+            12
+          ],
+          9
+        ],
+        "expected": 4
+      },
+      {
+        "input": [
+          [
+            -1,
+            0,
+            3,
+            5,
+            9,
+            12
+          ],
+          2
+        ],
+        "expected": -1
+      },
+      {
+        "input": [
+          [
+            5
+          ],
+          5
+        ],
+        "expected": 0
+      },
+      {
+        "input": [
+          [],
+          5
+        ],
+        "expected": -1
+      },
+      {
+        "input": [
+          [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          1
+        ],
+        "expected": 0
+      },
+      {
+        "input": [
+          [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          5
+        ],
+        "expected": 4
+      },
+      {
+        "input": [
+          [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          3
+        ],
+        "expected": 2
+      },
+      {
+        "input": [
+          [
+            2,
+            5
+          ],
+          5
+        ],
+        "expected": 1
+      },
+      {
+        "input": [
+          [
+            2,
+            5
+          ],
+          0
+        ],
+        "expected": -1
+      },
+      {
+        "input": [
+          [
+            -10,
+            -3,
+            0,
+            5,
+            9,
+            12,
+            20
+          ],
+          20
+        ],
+        "expected": 6
+      },
+      {
+        "input": [
+          [
+            1,
+            3,
+            5,
+            7,
+            9,
+            11,
+            13
+          ],
+          8
+        ],
+        "expected": -1
+      }
     ],
     "optimal_solution": {
       "python": "def search(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n",
@@ -86,26 +457,136 @@
     "optimal_time_complexity": "O(log n)",
     "optimal_space_complexity": "O(1)",
     "optimal_approach": "Classic binary search: shrink the search window in half each iteration rather than scanning linearly (O(n)).",
-    "cpp_driver": "\n#include <iostream>\n#include <vector>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    \n    vector<pair<pair<vector<int>, int>, int>> cases = {\n        {{{-1, 0, 3, 5, 9, 12}, 9}, 4},\n        {{{-1, 0, 3, 5, 9, 12}, 2}, -1},\n        {{{5}, 5}, 0},\n        {{{}, 5}, -1}\n    };\n    \n    for(int i = 0; i < cases.size(); i++) {\n        auto start = chrono::high_resolution_clock::now();\n        int out = sol.search(cases[i].first.first, cases[i].first.second);\n        auto end = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(end - start).count();\n        \n        bool passed = (out == cases[i].second);\n        cout << \"{\\\"test\\\": \" << i << \", \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n        if(i < cases.size() - 1) cout << \",\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
+    "cpp_driver": "#include <iostream>\n#include <vector>\n#include <string>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    {\n        vector<int> arg0 = {-1, 0, 3, 5, 9, 12}; int arg1 = 9;\n        int expected = 4;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 0, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {-1, 0, 3, 5, 9, 12}; int arg1 = 2;\n        int expected = -1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 1, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {5}; int arg1 = 5;\n        int expected = 0;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 2, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {}; int arg1 = 5;\n        int expected = -1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 3, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {1, 2, 3, 4, 5}; int arg1 = 1;\n        int expected = 0;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 4, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {1, 2, 3, 4, 5}; int arg1 = 5;\n        int expected = 4;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 5, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {1, 2, 3, 4, 5}; int arg1 = 3;\n        int expected = 2;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 6, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {2, 5}; int arg1 = 5;\n        int expected = 1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 7, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {2, 5}; int arg1 = 0;\n        int expected = -1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 8, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {-10, -3, 0, 5, 9, 12, 20}; int arg1 = 20;\n        int expected = 6;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 9, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {1, 3, 5, 7, 9, 11, 13}; int arg1 = 8;\n        int expected = -1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.search(arg0, arg1);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 10, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
   },
   {
     "id": "max-subarray",
     "title": "Maximum Subarray",
     "difficulty": "Medium",
     "topic": "Dynamic Programming",
-    "company_tags": ["Amazon", "Microsoft", "Meta"],
+    "company_tags": [
+      "Amazon",
+      "Microsoft",
+      "Meta"
+    ],
     "prompt": "Given an integer array `nums`, find the contiguous subarray (containing at least one number) which has the largest sum, and return that sum.",
-    "constraints": ["1 <= nums.length <= 10^5", "-10^4 <= nums[i] <= 10^4"],
+    "constraints": [
+      "1 <= nums.length <= 10^5",
+      "-10^4 <= nums[i] <= 10^4"
+    ],
     "function_name": "max_sub_array",
     "starter_code": {
       "python": "def max_sub_array(nums):\n    # write your solution here\n    pass\n",
       "cpp": "class Solution {\npublic:\n    int maxSubArray(vector<int>& nums) {\n        // write your solution here\n        return 0;\n    }\n};"
     },
     "test_cases": [
-      { "input": [[-2, 1, -3, 4, -1, 2, 1, -5, 4]], "expected": 6 },
-      { "input": [[1]], "expected": 1 },
-      { "input": [[5, 4, -1, 7, 8]], "expected": 23 },
-      { "input": [[-1, -2, -3]], "expected": -1 }
+      {
+        "input": [
+          [
+            -2,
+            1,
+            -3,
+            4,
+            -1,
+            2,
+            1,
+            -5,
+            4
+          ]
+        ],
+        "expected": 6
+      },
+      {
+        "input": [
+          [
+            1
+          ]
+        ],
+        "expected": 1
+      },
+      {
+        "input": [
+          [
+            5,
+            4,
+            -1,
+            7,
+            8
+          ]
+        ],
+        "expected": 23
+      },
+      {
+        "input": [
+          [
+            -1,
+            -2,
+            -3
+          ]
+        ],
+        "expected": -1
+      },
+      {
+        "input": [
+          [
+            -5
+          ]
+        ],
+        "expected": -5
+      },
+      {
+        "input": [
+          [
+            1,
+            2,
+            3,
+            4
+          ]
+        ],
+        "expected": 10
+      },
+      {
+        "input": [
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "expected": 0
+      },
+      {
+        "input": [
+          [
+            8,
+            -19,
+            5,
+            -4,
+            20
+          ]
+        ],
+        "expected": 21
+      },
+      {
+        "input": [
+          [
+            -2,
+            -1
+          ]
+        ],
+        "expected": -1
+      },
+      {
+        "input": [
+          [
+            3,
+            -2,
+            5,
+            -1
+          ]
+        ],
+        "expected": 6
+      }
     ],
     "optimal_solution": {
       "python": "def max_sub_array(nums):\n    best = cur = nums[0]\n    for num in nums[1:]:\n        cur = max(num, cur + num)\n        best = max(best, cur)\n    return best\n",
@@ -114,25 +595,265 @@
     "optimal_time_complexity": "O(n)",
     "optimal_space_complexity": "O(1)",
     "optimal_approach": "Kadane's algorithm: track the best sum ending at the current index, resetting when the running sum goes negative, instead of checking all O(n^2) subarrays.",
-    "cpp_driver": "\n#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    \n    vector<pair<vector<int>, int>> cases = {\n        {{-2, 1, -3, 4, -1, 2, 1, -5, 4}, 6},\n        {{1}, 1},\n        {{5, 4, -1, 7, 8}, 23},\n        {{-1, -2, -3}, -1}\n    };\n    \n    for(int i = 0; i < cases.size(); i++) {\n        auto start = chrono::high_resolution_clock::now();\n        int out = sol.maxSubArray(cases[i].first);\n        auto end = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(end - start).count();\n        \n        bool passed = (out == cases[i].second);\n        cout << \"{\\\"test\\\": \" << i << \", \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n        if(i < cases.size() - 1) cout << \",\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
+    "cpp_driver": "#include <iostream>\n#include <vector>\n#include <string>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    {\n        vector<int> arg0 = {-2, 1, -3, 4, -1, 2, 1, -5, 4};\n        int expected = 6;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 0, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {1};\n        int expected = 1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 1, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {5, 4, -1, 7, 8};\n        int expected = 23;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 2, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {-1, -2, -3};\n        int expected = -1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 3, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {-5};\n        int expected = -5;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 4, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {1, 2, 3, 4};\n        int expected = 10;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 5, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {0, 0, 0};\n        int expected = 0;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 6, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {8, -19, 5, -4, 20};\n        int expected = 21;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 7, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {-2, -1};\n        int expected = -1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 8, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<int> arg0 = {3, -2, 5, -1};\n        int expected = 6;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.maxSubArray(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 9, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
   },
   {
     "id": "merge-intervals",
     "title": "Merge Intervals",
     "difficulty": "Medium",
     "topic": "Sorting & Intervals",
-    "company_tags": ["Google", "Facebook", "Amazon"],
+    "company_tags": [
+      "Google",
+      "Facebook",
+      "Amazon"
+    ],
     "prompt": "Given an array of intervals where `intervals[i] = [start_i, end_i]`, merge all overlapping intervals and return an array of the non-overlapping intervals that cover all the intervals in the input, sorted by start.",
-    "constraints": ["1 <= intervals.length <= 10^4", "intervals[i].length == 2"],
+    "constraints": [
+      "1 <= intervals.length <= 10^4",
+      "intervals[i].length == 2"
+    ],
     "function_name": "merge",
     "starter_code": {
       "python": "def merge(intervals):\n    # write your solution here\n    pass\n",
       "cpp": "class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        // write your solution here\n        return {};\n    }\n};"
     },
     "test_cases": [
-      { "input": [[[1, 3], [2, 6], [8, 10], [15, 18]]], "expected": [[1, 6], [8, 10], [15, 18]] },
-      { "input": [[[1, 4], [4, 5]]], "expected": [[1, 5]] },
-      { "input": [[[1, 4], [0, 4]]], "expected": [[0, 4]] }
+      {
+        "input": [
+          [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              8,
+              10
+            ],
+            [
+              15,
+              18
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            1,
+            6
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            15,
+            18
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              1,
+              4
+            ],
+            [
+              4,
+              5
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            1,
+            5
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              1,
+              4
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            1,
+            4
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              3
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            1,
+            4
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              6,
+              7
+            ],
+            [
+              1,
+              10
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            1,
+            10
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              1,
+              4
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            0,
+            4
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              1,
+              4
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            0,
+            4
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              1,
+              4
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            1,
+            4
+          ],
+          [
+            5,
+            6
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              6,
+              7
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            1,
+            4
+          ],
+          [
+            6,
+            7
+          ]
+        ]
+      },
+      {
+        "input": [
+          [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        ],
+        "expected": [
+          [
+            1,
+            5
+          ]
+        ]
+      }
     ],
     "optimal_solution": {
       "python": "def merge(intervals):\n    intervals.sort(key=lambda x: x[0])\n    result = [intervals[0]]\n    for start, end in intervals[1:]:\n        if start <= result[-1][1]:\n            result[-1][1] = max(result[-1][1], end)\n        else:\n            result.append([start, end])\n    return result\n",
@@ -141,26 +862,88 @@
     "optimal_time_complexity": "O(n log n)",
     "optimal_space_complexity": "O(n)",
     "optimal_approach": "Sort intervals by start time, then do a single linear pass merging overlapping intervals in place instead of comparing every pair (O(n^2)).",
-    "cpp_driver": "\n#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    \n    vector<pair<vector<vector<int>>, vector<vector<int>>>> cases = {\n        {{{{1, 3}, {2, 6}, {8, 10}, {15, 18}}}, {{{1, 6}, {8, 10}, {15, 18}}}},\n        {{{{1, 4}, {4, 5}}}, {{{1, 5}}}},\n        {{{{1, 4}, {0, 4}}}, {{{0, 4}}}}\n    };\n    \n    for(int i = 0; i < cases.size(); i++) {\n        auto start = chrono::high_resolution_clock::now();\n        vector<vector<int>> out = sol.merge(cases[i].first);\n        auto end = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(end - start).count();\n        \n        bool passed = (out == cases[i].second);\n        cout << \"{\\\"test\\\": \" << i << \", \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n        if(i < cases.size() - 1) cout << \",\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
+    "cpp_driver": "#include <iostream>\n#include <vector>\n#include <string>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    {\n        vector<vector<int>> arg0 = {{1, 3}, {2, 6}, {8, 10}, {15, 18}};\n        vector<vector<int>> expected = {{1, 6}, {8, 10}, {15, 18}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 0, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{1, 4}, {4, 5}};\n        vector<vector<int>> expected = {{1, 5}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 1, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{1, 4}};\n        vector<vector<int>> expected = {{1, 4}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 2, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{1, 4}, {2, 3}};\n        vector<vector<int>> expected = {{1, 4}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 3, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{2, 3}, {4, 5}, {6, 7}, {1, 10}};\n        vector<vector<int>> expected = {{1, 10}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 4, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{1, 4}, {0, 4}};\n        vector<vector<int>> expected = {{0, 4}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 5, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{1, 4}, {0, 1}};\n        vector<vector<int>> expected = {{0, 4}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 6, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{1, 4}, {5, 6}};\n        vector<vector<int>> expected = {{1, 4}, {5, 6}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 7, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{6, 7}, {1, 3}, {2, 4}};\n        vector<vector<int>> expected = {{1, 4}, {6, 7}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 8, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        vector<vector<int>> arg0 = {{1, 4}, {2, 3}, {3, 5}};\n        vector<vector<int>> expected = {{1, 5}};\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.merge(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 9, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
   },
   {
     "id": "longest-substring",
     "title": "Longest Substring Without Repeating Characters",
     "difficulty": "Medium",
     "topic": "Sliding Window",
-    "company_tags": ["Amazon", "Adobe", "Microsoft"],
+    "company_tags": [
+      "Amazon",
+      "Adobe",
+      "Microsoft"
+    ],
     "prompt": "Given a string `s`, find the length of the longest substring without repeating characters.",
-    "constraints": ["0 <= s.length <= 5 * 10^4"],
+    "constraints": [
+      "0 <= s.length <= 5 * 10^4"
+    ],
     "function_name": "length_of_longest_substring",
     "starter_code": {
       "python": "def length_of_longest_substring(s):\n    # write your solution here\n    pass\n",
       "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        // write your solution here\n        return 0;\n    }\n};"
     },
     "test_cases": [
-      { "input": ["abcabcbb"], "expected": 3 },
-      { "input": ["bbbbb"], "expected": 1 },
-      { "input": ["pwwkew"], "expected": 3 },
-      { "input": [""], "expected": 0 }
+      {
+        "input": [
+          "abcabcbb"
+        ],
+        "expected": 3
+      },
+      {
+        "input": [
+          "bbbbb"
+        ],
+        "expected": 1
+      },
+      {
+        "input": [
+          "pwwkew"
+        ],
+        "expected": 3
+      },
+      {
+        "input": [
+          ""
+        ],
+        "expected": 0
+      },
+      {
+        "input": [
+          " "
+        ],
+        "expected": 1
+      },
+      {
+        "input": [
+          "au"
+        ],
+        "expected": 2
+      },
+      {
+        "input": [
+          "dvdf"
+        ],
+        "expected": 3
+      },
+      {
+        "input": [
+          "abba"
+        ],
+        "expected": 2
+      },
+      {
+        "input": [
+          "tmmzuxt"
+        ],
+        "expected": 5
+      },
+      {
+        "input": [
+          "abcdef"
+        ],
+        "expected": 6
+      }
     ],
     "optimal_solution": {
       "python": "def length_of_longest_substring(s):\n    last_seen = {}\n    start = 0\n    best = 0\n    for i, ch in enumerate(s):\n        if ch in last_seen and last_seen[ch] >= start:\n            start = last_seen[ch] + 1\n        last_seen[ch] = i\n        best = max(best, i - start + 1)\n    return best\n",
@@ -169,6 +952,6 @@
     "optimal_time_complexity": "O(n)",
     "optimal_space_complexity": "O(min(n, charset))",
     "optimal_approach": "Sliding window with a hashmap of last-seen index per character; move the window start forward on a repeat instead of re-scanning from every index (O(n^2)).",
-    "cpp_driver": "\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    \n    vector<pair<string, int>> cases = {\n        {\"abcabcbb\", 3},\n        {\"bbbbb\", 1},\n        {\"pwwkew\", 3},\n        {\"\", 0}\n    };\n    \n    for(int i = 0; i < cases.size(); i++) {\n        auto start = chrono::high_resolution_clock::now();\n        int out = sol.lengthOfLongestSubstring(cases[i].first);\n        auto end = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(end - start).count();\n        \n        bool passed = (out == cases[i].second);\n        cout << \"{\\\"test\\\": \" << i << \", \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n        if(i < cases.size() - 1) cout << \",\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
+    "cpp_driver": "#include <iostream>\n#include <vector>\n#include <string>\n#include <chrono>\nusing namespace std;\n\nint main() {\n    Solution sol;\n    cout << \"###RESULTS_START###\\n[\";\n    {\n        string arg0 = \"abcabcbb\";\n        int expected = 3;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 0, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"bbbbb\";\n        int expected = 1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 1, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"pwwkew\";\n        int expected = 3;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 2, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"\";\n        int expected = 0;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 3, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \" \";\n        int expected = 1;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 4, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"au\";\n        int expected = 2;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 5, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"dvdf\";\n        int expected = 3;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 6, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"abba\";\n        int expected = 2;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 7, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"tmmzuxt\";\n        int expected = 5;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 8, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\" << \",\";\n    }\n    {\n        string arg0 = \"abcdef\";\n        int expected = 6;\n        auto _s = chrono::high_resolution_clock::now();\n        auto out = sol.lengthOfLongestSubstring(arg0);\n        auto _e = chrono::high_resolution_clock::now();\n        double ms = chrono::duration<double, milli>(_e - _s).count();\n        bool passed = (out == expected);\n        cout << \"{\\\"test\\\": 9, \\\"passed\\\": \" << (passed ? \"true\" : \"false\") << \", \\\"elapsed_ms\\\": \" << ms << \"}\";\n    }\n    cout << \"]\\n###RESULTS_END###\\n\";\n    return 0;\n}\n"
   }
 ]

@@ -95,11 +95,13 @@ class SubmitCodeRequest(BaseModel):
 # ─── Evaluation (Code-only, backward compat) ──────────────────────────────────
 
 class TestCaseResult(BaseModel):
-    test:     int
-    passed:   bool
-    output:   Any = None
-    expected: Any = None
-    error:    Optional[str] = None
+    test:       int
+    passed:     bool
+    input:      Any = None
+    output:     Any = None
+    expected:   Any = None
+    error:      Optional[str] = None
+    elapsed_ms: Optional[float] = None
 
 
 class QuestionEvaluation(BaseModel):
@@ -148,6 +150,13 @@ class QuestionEvaluation(BaseModel):
 
 class SubmitCodeResponse(BaseModel):
     evaluation: QuestionEvaluation
+    # ── Execution details, so the frontend can show a LeetCode-style breakdown ──
+    status:        str = "Unknown"                 # Accepted | Wrong Answer | Compilation Error | ...
+    tests_passed:  int = 0
+    tests_total:   int = 0
+    test_results:  list[TestCaseResult] = []
+    compile_error: Optional[str] = None
+    stderr:        Optional[str] = None
 
 
 # ─── Report ───────────────────────────────────────────────────────────────────

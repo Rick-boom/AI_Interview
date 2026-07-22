@@ -17,6 +17,7 @@ from app.schemas import (
     StartInterviewResponse,
     SubmitCodeRequest,
     SubmitCodeResponse,
+    TestCaseResult,
 )
 
 router = APIRouter(prefix="/api/interview", tags=["interview"])
@@ -103,6 +104,45 @@ async def submit_code(session_id: str, req: SubmitCodeRequest):
 
     evaluation = QuestionEvaluation(**eval_dict)
 
+    # ── Build a per-test-case breakdown for the console (LeetCode-style) ──────
+    raw_results = run_result.get("results", []) or []
+    test_cases = question.get("test_cases", []) or []
+    test_results: list[TestCaseResult] = []
+    for i, tc in enumerate(test_cases):
+        r = next((rr for rr in raw_results if rr.get("test") == i), None)
+        if r is None:
+            # No result for this case — usually a compile error or a crash before it ran.
+            test_results.append(TestCaseResult(
+                test=i,
+                passed=False,
+                input=tc.get("input"),
+                expected=tc.get("expected"),
+                error="Did not run (see the compile / runtime error above).",
+            ))
+        else:
+            test_results.append(TestCaseResult(
+                test=i,
+                passed=bool(r.get("passed")),
+                input=tc.get("input"),
+                output=r.get("output"),
+                expected=r.get("expected", tc.get("expected")),
+                error=r.get("error"),
+                elapsed_ms=r.get("elapsed_ms"),
+            ))
+
+    tests_passed = sum(1 for r in test_results if r.passed)
+    tests_total = len(test_results)
+
+    compile_error = run_result.get("compile_error")
+    if compile_error:
+        display_status = "Compilation Error"
+    elif tests_total and tests_passed == tests_total:
+        display_status = "Accepted"
+    elif tests_total:
+        display_status = "Wrong Answer"
+    else:
+        display_status = run_result.get("status", "Unknown")
+
     # ── Persist evaluation + research metadata to the session ────────────────
     session_eval_record = {
         **eval_dict,
@@ -119,7 +159,15 @@ async def submit_code(session_id: str, req: SubmitCodeRequest):
     }
     session["evaluations"].append(session_eval_record)
 
-    return SubmitCodeResponse(evaluation=evaluation)
+    return SubmitCodeResponse(
+        evaluation=evaluation,
+        status=display_status,
+        tests_passed=tests_passed,
+        tests_total=tests_total,
+        test_results=test_results,
+        compile_error=compile_error,
+        stderr=run_result.get("stderr"),
+    )
 
 
 @router.get("/{session_id}/report", response_model=ReportResponse)
@@ -134,11 +182,21 @@ def get_report(session_id: str):
         latest_evals[e["question_id"]] = e
     evaluations = list(latest_evals.values())
 
+    duration = int(time.time() - session["started_at"])
+
     if not evaluations:
-        raise HTTPException(400, "No questions answered yet.")
+        return ReportResponse(
+            session_id=session_id,
+            candidate_name=session["candidate_name"],
+            overall_score=0,
+            total_questions=len(session["questions"]),
+            questions_answered=0,
+            duration_seconds=duration,
+            evaluations=[],
+            summary="No questions were submitted during this interview session.",
+        )
 
     overall = round(sum(e["score"] for e in evaluations) / len(evaluations))
-    duration = int(time.time() - session["started_at"])
 
     if overall >= 85:
         summary = "Strong performance — consistently correct, efficient solutions. Ready for real interviews at this difficulty level."
@@ -159,6 +217,7 @@ def get_report(session_id: str):
         evaluations=[QuestionEvaluation(**e) for e in evaluations],
         summary=summary,
     )
+
 
 
 # ─── Research Data CSV Export ──────────────────────────────────────────────────

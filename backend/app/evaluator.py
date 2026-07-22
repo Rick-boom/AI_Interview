@@ -11,6 +11,7 @@ Hypothesis: Code + Verbal Explanation + Telemetry increases grading reliability,
 If no GEMINI_API_KEY is set, falls back to a heuristic (test pass rate
 only) so the rest of the app still works end to end during setup.
 """
+import asyncio
 import json
 import re
 from typing import Optional
@@ -134,9 +135,48 @@ def _heuristic_evaluation(question: dict, tests_passed: int, tests_total: int) -
 
 
 def _extract_json(text: str) -> dict:
-    text = text.strip()
+    """Parse the model's JSON reply, tolerating markdown fences or stray prose."""
+    text = (text or "").strip()
+    # Strip ```json ... ``` fences if present.
     text = re.sub(r"^```(json)?|```$", "", text, flags=re.MULTILINE).strip()
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # Last resort: grab the outermost {...} block and try again.
+        match = re.search(r"\{.*\}", text, flags=re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+        raise
+
+
+def _ai_failure_message(exc: Exception) -> str:
+    """Turn an exception from the Gemini call into clear, actionable candidate-facing text."""
+    detail = f"{exc.__class__.__name__}: {exc}"
+    low = detail.lower()
+    auth_problem = any(s in low for s in (
+        "access_token_type_unsupported", "api key not valid", "api_key_invalid",
+        "unauthorized", "permission_denied", "permission denied", "401", "403",
+    ))
+    key = settings.GEMINI_API_KEY or ""
+
+    if auth_problem and key.startswith("AQ."):
+        return (
+            "AI grading is off because your Gemini key was rejected. It is a new-format "
+            "'AQ.' auth key, which Google's generateContent API currently rejects "
+            "(ACCESS_TOKEN_TYPE_UNSUPPORTED). Use a standard 'AIza…' key, an Anthropic/OpenAI "
+            "key with a matching grader, or read HOW-TO-RUN.md for options. The score shown "
+            "is based on the test-case pass rate only."
+        )
+    if auth_problem:
+        return (
+            "AI grading is off because the Gemini API key was rejected. Check that "
+            "GEMINI_API_KEY in backend/.env is a valid Google AI Studio key. The score shown "
+            "is based on the test-case pass rate only."
+        )
+    return (
+        "AI grading is temporarily unavailable, so this score reflects the test-case pass "
+        f"rate only. Details for the backend terminal: {detail}"
+    )
 
 
 async def evaluate_submission(
@@ -215,20 +255,25 @@ async def evaluate_submission(
             })
 
         try:
-            response = client.models.generate_content(
+            # Run the blocking SDK call in a worker thread so it doesn't stall the
+            # server's event loop while waiting on the network.
+            response = await asyncio.to_thread(
+                client.models.generate_content,
                 model=settings.GEMINI_MODEL,
                 contents=user_content,
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt,
                     max_output_tokens=1500,
                     temperature=0.2,
+                    # Force valid JSON output so parsing is reliable.
+                    response_mime_type="application/json",
                 ),
             )
             text = response.text or ""
             llm_eval = _extract_json(text)
         except Exception as e:
             llm_eval = _heuristic_evaluation(question, tests_passed, tests_total)
-            llm_eval["feedback"] = f"AI Evaluation failed ({e.__class__.__name__}: {str(e)}). Showing pass-rate score instead."
+            llm_eval["feedback"] = _ai_failure_message(e)
 
     # ── Compute weighted overall score ─────────────────────────────────────────
     correctness = int(llm_eval.get("correctness_score", 0))

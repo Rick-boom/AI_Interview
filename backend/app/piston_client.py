@@ -23,7 +23,10 @@ END_MARKER = "###RESULTS_END###"
 DRIVER_TEMPLATE = """
 import json, time
 
-__TEST_CASES__ = {test_cases_json}
+# Test cases are embedded as a JSON string and parsed at runtime so that JSON
+# literals (true/false/null) are correctly turned into Python (True/False/None)
+# instead of being spliced into the source as bare, undefined names.
+__TEST_CASES__ = json.loads({test_cases_json})
 __FUNCTION_NAME__ = {function_name_json}
 
 __results__ = []
@@ -57,6 +60,29 @@ class CodeExecutionError(Exception):
     pass
 
 
+# Standard headers made available to every C++ submission. The per-question
+# cpp_driver is appended AFTER the candidate's code, so without this prelude the
+# candidate's `class Solution` would reference vector/unordered_map/etc. before
+# any <...> header is included and fail to compile. Duplicate includes here and
+# in the driver are harmless (header guards) as is repeating `using namespace std;`.
+CPP_PRELUDE = (
+    "#include <iostream>\n"
+    "#include <vector>\n"
+    "#include <string>\n"
+    "#include <algorithm>\n"
+    "#include <unordered_map>\n"
+    "#include <unordered_set>\n"
+    "#include <map>\n"
+    "#include <set>\n"
+    "#include <stack>\n"
+    "#include <queue>\n"
+    "#include <cmath>\n"
+    "#include <climits>\n"
+    "#include <numeric>\n"
+    "using namespace std;\n"
+)
+
+
 def build_source(
     candidate_code: str,
     function_name: str,
@@ -65,10 +91,12 @@ def build_source(
     question: dict = None,
 ) -> str:
     if language == "cpp" and question and "cpp_driver" in question:
-        return candidate_code + "\n\n" + question["cpp_driver"]
+        return CPP_PRELUDE + "\n" + candidate_code + "\n\n" + question["cpp_driver"]
 
     driver = DRIVER_TEMPLATE.format(
-        test_cases_json=json.dumps(test_cases),
+        # Double-encode: json.dumps(...) of the JSON text yields a valid Python
+        # string literal that the driver then json.loads() back into real data.
+        test_cases_json=json.dumps(json.dumps(test_cases)),
         function_name_json=json.dumps(function_name),
         start_marker=START_MARKER,
         end_marker=END_MARKER,
@@ -76,29 +104,30 @@ def build_source(
     return candidate_code + "\n\n" + driver
 
 
-async def _run_subprocess(cmd: list[str], input_data: str = "", timeout: float = 10.0) -> tuple[str, str, int]:
-    """Run a command asynchronously and return (stdout, stderr, returncode)."""
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        stdin=asyncio.subprocess.PIPE,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
+def _sync_run_subprocess(cmd: list[str], input_data: str = "", timeout: float = 10.0) -> tuple[str, str, int]:
+    import subprocess
     try:
-        stdout_b, stderr_b = await asyncio.wait_for(
-            proc.communicate(input=input_data.encode()),
+        proc = subprocess.run(
+            cmd,
+            input=input_data.encode("utf-8") if input_data else None,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             timeout=timeout,
         )
-    except asyncio.TimeoutError:
-        proc.kill()
-        await proc.communicate()
-        return "", "Execution timed out (> 10s)", -1
+        return (
+            proc.stdout.decode(errors="replace"),
+            proc.stderr.decode(errors="replace"),
+            proc.returncode,
+        )
+    except subprocess.TimeoutExpired:
+        return ("", "Execution timed out (> 10s)", -1)
+    except Exception as e:
+        return ("", str(e), -1)
 
-    return (
-        stdout_b.decode(errors="replace"),
-        stderr_b.decode(errors="replace"),
-        proc.returncode,
-    )
+
+async def _run_subprocess(cmd: list[str], input_data: str = "", timeout: float = 10.0) -> tuple[str, str, int]:
+    """Run a command asynchronously using a thread pool worker for universal OS / event loop compatibility."""
+    return await asyncio.to_thread(_sync_run_subprocess, cmd, input_data, timeout)
 
 
 async def run_against_test_cases(
